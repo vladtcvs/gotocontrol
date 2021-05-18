@@ -40,7 +40,7 @@ private:
     LX200Server *server;
     MountController *ctl;
     CoordinateSystem *cs;
-    QSerialPort mountport;
+    QSerialPort *mountport;
     QSerialPort *lx200port;
     bool mountconnected;
     bool lx200running;

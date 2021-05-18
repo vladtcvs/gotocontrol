@@ -13,12 +13,13 @@ MainWindow::MainWindow(QWidget *parent)
     timer = new QTimer(this);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(read_position()));
-    connect(&mountport, SIGNAL(error(QSerialPort::SerialPortError)),this,SLOT(serialPortError(QSerialPort::SerialPortError)));
+
     ui->setupUi(this);
     mountconnected = false;
     lx200port = nullptr;
     lx200running = false;
     system = nullptr;
+    mountport = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -51,6 +52,11 @@ void MainWindow::connect_port()
 
 void MainWindow::disconnect_port()
 {
+    timer->stop();
+    mountconnected = false;
+    ui->connect->setText("Connect");
+    ui->lx200listen->setEnabled(false);
+
     if (lx200running)
     {
         stop_lx200_server();
@@ -70,11 +76,14 @@ void MainWindow::disconnect_port()
         delete cs;
         cs = nullptr;
     }
-    timer->stop();
-    mountconnected = false;
-    mountport.close();
-    ui->connect->setText("Connect");
-    ui->lx200listen->setEnabled(false);
+    if (mountport)
+    {
+        disconnect(mountport, SIGNAL(error(QSerialPort::SerialPortError)),this,SLOT(serialPortError(QSerialPort::SerialPortError)));
+        mountport->close();
+        delete mountport;
+        mountport = nullptr;
+    }
+
 }
 
 void MainWindow::on_connect_clicked()
@@ -239,15 +248,15 @@ void MainWindow::serialPortError(QSerialPort::SerialPortError error)
 
 void MainWindow::Init()
 {
-    if (mountport.isOpen())
-        mountport.close();
-    mountport.setPortName(ui->mountport->text());
-    mountport.setBaudRate(QSerialPort::Baud9600);
-    mountport.setParity(QSerialPort::NoParity);
-    mountport.setDataBits(QSerialPort::Data8);
-    mountport.setStopBits(QSerialPort::OneStop);
-    mountport.setFlowControl(QSerialPort::NoFlowControl);
-    if (!mountport.open(QIODevice::ReadWrite))
+    mountport = new QSerialPort();
+    connect(mountport, SIGNAL(error(QSerialPort::SerialPortError)),this,SLOT(serialPortError(QSerialPort::SerialPortError)));
+    mountport->setPortName(ui->mountport->text());
+    mountport->setBaudRate(QSerialPort::Baud9600);
+    mountport->setParity(QSerialPort::NoParity);
+    mountport->setDataBits(QSerialPort::Data8);
+    mountport->setStopBits(QSerialPort::OneStop);
+    mountport->setFlowControl(QSerialPort::NoFlowControl);
+    if (!mountport->open(QIODevice::ReadWrite))
     {
         QMessageBox box;
         box.setText("Can not open port");
@@ -258,7 +267,7 @@ void MainWindow::Init()
     QTimeZone tz = QTimeZone(ui->timezone->text().toLatin1());
     double lon = ui->longitude->text().toDouble();
     cs = new CoordinateSystem(tz, lon);
-    ctl = new MountController(&mountport, subseconds);
+    ctl = new MountController(mountport, subseconds);
     system = new MountSystem(ctl, cs);
 }
 
