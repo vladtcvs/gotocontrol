@@ -17,7 +17,7 @@ private:
     QMutex mutex;
 private:
     void send(const QString &cmd);
-    QString read();
+    std::tuple<bool, QString> read();
 
     std::tuple<double, double, HMode>  ParseState_HA_Dec(const QString &state);
     QString CmdReadPosition();
@@ -27,7 +27,7 @@ private:
     QString CmdSetHADec(double ha, double dec);
 public:
     MountController(QSerialPort *port, int subseconds);
-    std::tuple<double, double> ReadPositionHA();
+    std::tuple<bool, double, double> ReadPositionHA();
     void DisableSteppers();
     void SetSpeed(double haspeed, double decspeed);
     void GotoHADec(double ha, double dec);

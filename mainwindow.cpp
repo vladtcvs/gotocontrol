@@ -28,51 +28,64 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::connect_port()
+{
+    try
+    {
+        Init();
+    }
+    catch (...)
+    {
+        return;
+    }
+
+    if (read_position())
+    {
+        ui->connect->setText("Disconnect");
+        mountconnected = true;
+
+        timer->start(500);
+        ui->lx200listen->setEnabled(true);
+    }
+}
+
+void MainWindow::disconnect_port()
+{
+    if (lx200running)
+    {
+        stop_lx200_server();
+    }
+    if (system)
+    {
+        delete system;
+        system = nullptr;
+    }
+    if (ctl)
+    {
+        delete ctl;
+        ctl = nullptr;
+    }
+    if (cs)
+    {
+        delete cs;
+        cs = nullptr;
+    }
+    timer->stop();
+    mountconnected = false;
+    mountport.close();
+    ui->connect->setText("Connect");
+    ui->lx200listen->setEnabled(false);
+}
+
 void MainWindow::on_connect_clicked()
 {
     if (!mountconnected)
     {
-        try
-        {
-            Init();
-        }
-        catch (...)
-        {
-            return;
-        }
-
-        ui->connect->setText("Disconnect");
-        mountconnected = true;
-        read_position();
-        timer->start(500);
-        ui->lx200listen->setEnabled(true);
+        connect_port();
     }
     else
     {
-        if (lx200running)
-        {
-            stop_lx200_server();
-        }
-        if (system)
-        {
-            delete system;
-            system = nullptr;
-        }
-        if (ctl)
-        {
-            delete ctl;
-            ctl = nullptr;
-        }
-        if (cs)
-        {
-            delete cs;
-            cs = nullptr;
-        }
-        timer->stop();
-        mountconnected = false;
-        mountport.close();
-        ui->connect->setText("Connect");
-        ui->lx200listen->setEnabled(false);
+        disconnect_port();
     }
 }
 
@@ -183,9 +196,14 @@ void MainWindow::on_lx200serial_toggled(bool checked)
     }
 }
 
-void MainWindow::read_position()
+bool MainWindow::read_position()
 {
-    system->ReadPosition();
+    if (!system->ReadPosition())
+    {
+        disconnect_port();
+        return false;
+    }
+
     std::tuple<double, double> hadec = system->CurrentPosition_HA_Dec();
     std::tuple<double, double> radec = system->CurrentPosition_RA_Dec();
     double ra = std::get<0>(radec);
@@ -207,10 +225,15 @@ void MainWindow::read_position()
     ui->curDecd->setText(QString::number(dec_d));
     ui->curDecm->setText(QString::number(dec_m));
     ui->curDecs->setText(QString::number(dec_s));
+    return true;
 }
 
 void MainWindow::serialPortError(QSerialPort::SerialPortError error)
 {
+    if (error == QSerialPort::NoError)
+    {
+        return;
+    }
     qWarning() << "Serial port error" << error;
 }
 

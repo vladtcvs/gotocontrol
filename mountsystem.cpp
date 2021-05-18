@@ -49,12 +49,15 @@ void MountSystem::SetSpeed_HA_Dec(double speed_ha, double speed_dec)
     ctl->SetSpeed(speed_ha, speed_dec);
 }
 
-void MountSystem::ReadPosition()
+bool MountSystem::ReadPosition()
 {
-    std::tuple<double, double> hadec = ctl->ReadPositionHA();
-    this->ha = std::get<0>(hadec);
-    this->dec = std::get<1>(hadec);
+    std::tuple<bool, double, double> hadec = ctl->ReadPositionHA();
+    if (!std::get<0>(hadec))
+        return false;
+    this->ha = std::get<1>(hadec);
+    this->dec = std::get<2>(hadec);
     this->ra = cs->Convert_HA2RA(this->ha, QDateTime::currentDateTime());
+    return true;
 }
 
 void MountSystem::DisableSteppers()

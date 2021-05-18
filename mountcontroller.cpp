@@ -10,7 +10,7 @@ void MountController::send(const QString &cmd)
     port->flush();
 }
 
-QString MountController::read()
+std::tuple<bool, QString> MountController::read()
 {
     QByteArray buffer;
     while (true)
@@ -20,7 +20,7 @@ QString MountController::read()
         QByteArray data = port->readLine();
         buffer.append(data);
         if (buffer.length() == 0)
-            continue;
+            return std::make_tuple(false, "");
         char last = buffer[buffer.length()-1];
         if (last != '\n' && last != '\r')
             continue;
@@ -33,7 +33,7 @@ QString MountController::read()
         {
             continue;
         }
-        return line;
+        return std::make_tuple(true, line);
     }
 }
 
@@ -79,16 +79,18 @@ MountController::MountController(QSerialPort *port, int subseconds)
     this->subseconds = subseconds;
 }
 
-std::tuple<double, double> MountController::ReadPositionHA()
+std::tuple<bool, double, double> MountController::ReadPositionHA()
 {
     mutex.lock();
     send(CmdReadPosition());
-    QString ans = read();
+    std::tuple<bool, QString> ans = read();
     mutex.unlock();
-    std::tuple<double, double, HMode> state = ParseState_HA_Dec(ans);
+    if (std::get<0>(ans) == false)
+        return std::make_tuple(false, 0, 0);
+    std::tuple<double, double, HMode> state = ParseState_HA_Dec(std::get<1>(ans));
     double ha = std::get<0>(state);
     double dec = std::get<1>(state);
-    return std::make_tuple(ha, dec);
+    return std::make_tuple(true, ha, dec);
 }
 
 void MountController::DisableSteppers()

@@ -31,7 +31,7 @@ public slots:
     void on_mountport_returnPressed();
     void on_lx200port_returnPressed();
 
-    void read_position();
+    bool read_position();
     void serialPortError(QSerialPort::SerialPortError error);
 private:
     QTimer *timer;
@@ -50,6 +50,8 @@ private:
     const int baudrate = 9600;
     const QString ptmx = "/dev/ptmx";
 private:
+    void connect_port();
+    void disconnect_port();
     void Init();
     void start_lx200_server();
     void stop_lx200_server();

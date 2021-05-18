@@ -23,7 +23,7 @@ public:
     std::tuple<double, double> CurrentPosition_HA_Dec();
     std::tuple<double, double> CurrentPosition_RA_Dec();
     void SetSpeed_HA_Dec(double speed_ha, double speed_dec);
-    void ReadPosition();
+    bool ReadPosition();
     void DisableSteppers();
 };
 
