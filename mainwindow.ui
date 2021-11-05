@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
+    <width>957</width>
     <height>676</height>
    </rect>
   </property>
@@ -746,6 +746,86 @@ steppers</string>
       </item>
      </layout>
     </item>
+    <item row="0" column="2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="normalizeCS">
+        <property name="text">
+         <string>Normalize coordinates</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="switchCS">
+        <property name="text">
+         <string>Switch coordinates</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QRadioButton" name="selectCS1">
+          <property name="text">
+           <string>CS 1</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">csGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="selectCS2">
+          <property name="text">
+           <string>CS 2</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">csGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -753,7 +833,7 @@ steppers</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>831</width>
+     <width>957</width>
      <height>22</height>
     </rect>
    </property>
@@ -763,8 +843,9 @@ steppers</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="gotoGroup"/>
   <buttongroup name="setGroup"/>
+  <buttongroup name="gotoGroup"/>
   <buttongroup name="lx200Group"/>
+  <buttongroup name="csGroup"/>
  </buttongroups>
 </ui>

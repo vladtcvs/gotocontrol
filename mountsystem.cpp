@@ -5,6 +5,8 @@ MountSystem::MountSystem(MountController *ctl, CoordinateSystem *cs)
 {
     this->cs = cs;
     this->ctl = ctl;
+
+    this->dec_invert = false;
 }
 
 void MountSystem::SetPosition_HA_Dec(double ha, double dec)
@@ -34,6 +36,12 @@ void MountSystem::GotoPosition_RA_Dec(double ra, double dec)
     ctl->GotoHADec(ha, dec);
 }
 
+void MountSystem::SetDecAxisDirection(bool invert)
+{
+    this->dec_invert = invert;
+    ctl->SetDecAxisDirection(dec_invert);
+}
+
 std::tuple<double, double> MountSystem::CurrentPosition_HA_Dec()
 {
     return std::make_tuple(ha, dec);
@@ -60,7 +68,42 @@ bool MountSystem::ReadPosition()
     return true;
 }
 
+bool MountSystem::DecAxisDirection()
+{
+    return dec_invert;
+}
+
 void MountSystem::DisableSteppers()
 {
     ctl->DisableSteppers();
+}
+
+void MountSystem::NormalizeCoordinates()
+{
+    bool inv = false;
+    if (dec > 90)
+    {
+        dec = 180 - dec;
+        inv = true;
+    }
+    else if (dec < -90)
+    {
+        dec = -180 - dec;
+        inv = true;
+    }
+
+    SetPosition_RA_Dec(ra, dec);
+    if (inv)
+        SetDecAxisDirection(!dec_invert);
+}
+
+void MountSystem::InvertCoordinates()
+{
+    NormalizeCoordinates();
+    if (dec > 0)
+        dec = 180 - dec;
+    else
+        dec = -180 - dec;
+    SetDecAxisDirection(!dec_invert);
+    SetPosition_RA_Dec(ra, dec);
 }

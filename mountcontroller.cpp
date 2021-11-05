@@ -56,6 +56,14 @@ QString MountController::CmdDisable()
     return "D";
 }
 
+QString MountController::CmdDecAxisDirection(bool dir)
+{
+    if (dir)
+        return "W T";
+    else
+        return "W F";
+}
+
 QString MountController::CmdSetSpeed(double haspeed, double decspeed)
 {
     int ssha = haspeed * subseconds;
@@ -121,6 +129,14 @@ void MountController::SetHADec(double ha, double dec)
 {
     mutex.lock();
     send(CmdSetHADec(ha, dec));
+    read();
+    mutex.unlock();
+}
+
+void MountController::SetDecAxisDirection(bool invert)
+{
+    mutex.lock();
+    send(CmdDecAxisDirection(invert));
     read();
     mutex.unlock();
 }

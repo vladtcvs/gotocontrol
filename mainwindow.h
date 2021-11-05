@@ -28,6 +28,11 @@ public slots:
     void on_lx200pty_toggled(bool checked);
     void on_lx200serial_toggled(bool checked);
 
+    void on_normalizeCS_clicked();
+    void on_switchCS_clicked();
+    void on_setCS1_toggled(bool checked);
+    void on_setCS2_toggled(bool checked);
+
     void on_mountport_returnPressed();
     void on_lx200port_returnPressed();
 

@@ -25,6 +25,7 @@ private:
     QString CmdSetSpeed(double haspeed, double decspeed);
     QString CmdGotoHADec(double ha, double dec);
     QString CmdSetHADec(double ha, double dec);
+    QString CmdDecAxisDirection(bool dir);
 public:
     MountController(QSerialPort *port, int subseconds);
     std::tuple<bool, double, double> ReadPositionHA();
@@ -32,6 +33,7 @@ public:
     void SetSpeed(double haspeed, double decspeed);
     void GotoHADec(double ha, double dec);
     void SetHADec(double ha, double dec);
+    void SetDecAxisDirection(bool invert);
 };
 
 #endif // MOUNTCONTROLLER_H

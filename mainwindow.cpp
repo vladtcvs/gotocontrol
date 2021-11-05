@@ -174,6 +174,50 @@ void MainWindow::on_setRotationSpeed_clicked()
     }
 }
 
+void MainWindow::on_normalizeCS_clicked()
+{
+    system->NormalizeCoordinates();
+    if (system->DecAxisDirection())
+    {
+        ui->selectCS1->setChecked(false);
+        ui->selectCS2->setChecked(true);
+    }
+    else
+    {
+        ui->selectCS1->setChecked(true);
+        ui->selectCS2->setChecked(false);
+    }
+}
+
+void MainWindow::on_switchCS_clicked()
+{
+    system->InvertCoordinates();
+    if (system->DecAxisDirection())
+    {
+        ui->selectCS1->setChecked(false);
+        ui->selectCS2->setChecked(true);
+    }
+    else
+    {
+        ui->selectCS1->setChecked(true);
+        ui->selectCS2->setChecked(false);
+    }
+}
+
+void MainWindow::on_setCS1_toggled(bool checked)
+{
+    if (!checked)
+        return;
+    system->SetDecAxisDirection(false);
+}
+
+void MainWindow::on_setCS2_toggled(bool checked)
+{
+    if (!checked)
+        return;
+    system->SetDecAxisDirection(true);
+}
+
 void MainWindow::on_lx200listen_clicked()
 {
     if (!lx200running)
