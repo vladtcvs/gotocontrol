@@ -158,7 +158,7 @@ std::tuple<double, double> CoordinateSystem::Inverted_HA_Dec_Coordinates(double 
     if (dec > 0)
         dec = 180-dec;
     else
-        dec = -180+dec;
+        dec = -180-dec;
     ha = ha + 12;
     while (ha < 0)
         ha += 24;
