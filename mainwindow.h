@@ -22,7 +22,7 @@ public slots:
     void on_connect_clicked();
     void on_disableSteppers_clicked();
     void on_gotoPosition_clicked();
-    void on_setPosition_clicked();
+    void on_setPosition_toggle();
     void on_setRotationSpeed_clicked();
     void on_lx200listen_clicked();
     void on_lx200pty_toggled(bool checked);
@@ -60,7 +60,9 @@ private:
     void Init();
     void start_lx200_server();
     void stop_lx200_server();
-    std::tuple<int, int, double> toHMS(double x);
-    double fromHMS(int h, int m, double s);
+    QString toHMS(double x);
+    double fromHMS(QString hms);
+    QString toDMS(double x);
+    double fromDMS(QString hms);
 };
 #endif // MAINWINDOW_H

@@ -132,33 +132,35 @@ void MainWindow::on_gotoPosition_clicked()
 {
     if (mountconnected)
     {
-        double dec = fromHMS(ui->gotoDecd->text().toDouble(), ui->gotoDecm->text().toDouble(), ui->gotoDecs->text().toDouble());
-        if (ui->gotoHA->isChecked())
+        double dec = fromDMS(ui->posDEC->text());
+        if (ui->modeHA->isChecked())
         {
-            double ha = fromHMS(ui->gotoHAh->text().toDouble(), ui->gotoHAm->text().toDouble(), ui->gotoHAs->text().toDouble());
+            double ha = fromHMS(ui->posHA->text());
             system->GotoPosition_HA_Dec(ha, dec);
         }
-        else if (ui->gotoRA->isChecked())
+        else if (ui->modeRA->isChecked())
         {
-            double ra = fromHMS(ui->gotoRAh->text().toDouble(), ui->gotoRAm->text().toDouble(), ui->gotoRAs->text().toDouble());
+            double ra = fromHMS(ui->posRA->text());
             system->GotoPosition_RA_Dec(ra, dec);
         }
     }
 }
 
-void MainWindow::on_setPosition_clicked()
+void MainWindow::on_setPosition_toggle()
 {
+    if (ui->setPosition->isChecked())
+        return;
     if (mountconnected)
     {
-        double dec = fromHMS(ui->setDecd->text().toDouble(), ui->setDecm->text().toDouble(), ui->setDecs->text().toDouble());
-        if (ui->setHA->isChecked())
+        double dec = fromDMS(ui->posDEC->text());
+        if (ui->modeHA->isChecked())
         {
-            double ha = fromHMS(ui->setHAh->text().toDouble(), ui->setHAm->text().toDouble(), ui->setHAs->text().toDouble());
+            double ha = fromHMS(ui->posHA->text());
             system->SetPosition_HA_Dec(ha, dec);
         }
-        else if (ui->setRA->isChecked())
+        else if (ui->modeRA->isChecked())
         {
-            double ra = fromHMS(ui->setRAh->text().toDouble(), ui->setRAm->text().toDouble(), ui->setRAs->text().toDouble());
+            double ra = fromHMS(ui->posRA->text());
             system->SetPosition_RA_Dec(ra, dec);
         }
     }
@@ -263,21 +265,16 @@ bool MainWindow::read_position()
     double ha = std::get<0>(hadec);
     double dec = std::get<1>(radec);
 
-    auto [ha_h, ha_m, ha_s] = toHMS(ha);
-    auto [ra_h, ra_m, ra_s] = toHMS(ra);
-    auto [dec_d, dec_m, dec_s] = toHMS(dec);
+    auto ha_hms = toHMS(ha);
+    auto ra_hms = toHMS(ra);
+    auto dec_dms = toDMS(dec);
 
-    ui->curHAh->setText(QString::number(ha_h));
-    ui->curHAm->setText(QString::number(ha_m));
-    ui->curHAs->setText(QString::number(ha_s));
-
-    ui->curRAh->setText(QString::number(ra_h));
-    ui->curRAm->setText(QString::number(ra_m));
-    ui->curRAs->setText(QString::number(ra_s));
-
-    ui->curDecd->setText(QString::number(dec_d));
-    ui->curDecm->setText(QString::number(dec_m));
-    ui->curDecs->setText(QString::number(dec_s));
+    if (!ui->setPosition->isChecked())
+    {
+        ui->posHA->setText(ha_hms);
+        ui->posRA->setText(ra_hms);
+        ui->posDEC->setText(dec_dms);
+    }
     return true;
 }
 
@@ -381,18 +378,22 @@ void MainWindow::stop_lx200_server()
     lx200running = false;
 }
 
-std::tuple<int, int, double> MainWindow::toHMS(double x)
+QString MainWindow::toHMS(double x)
 {
-    int sign = (x >= 0) ? 1 : -1;
-    x = abs(x);
-    int h = x;
-    int m = x * 60 - h * 60;
-    int s = x * 3600 - h * 3600 - m * 60;
-    return std::make_tuple(h * sign, m, s);
+    return QString::number(x);
 }
 
-double MainWindow::fromHMS(int h, int m, double s)
+double MainWindow::fromHMS(QString hms)
 {
-    int sign = (h >= 0) ? 1 : -1;
-    return  sign * (abs(h) + m / 60.0 + s / 3600.0);
+    return  hms.toDouble();
+}
+
+QString MainWindow::toDMS(double x)
+{
+    return QString::number(x);
+}
+
+double MainWindow::fromDMS(QString dms)
+{
+    return  dms.toDouble();
 }
