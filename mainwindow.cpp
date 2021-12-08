@@ -132,16 +132,25 @@ void MainWindow::on_gotoPosition_clicked()
 {
     if (mountconnected)
     {
-        double dec = fromDMS(ui->posDEC->text());
-        if (ui->modeHA->isChecked())
+        if (ui->modeEQ->isChecked())
         {
-            double ha = fromHMS(ui->posHA->text());
-            system->GotoPosition_HA_Dec(ha, dec);
+            double dec = fromDMS(ui->posDEC->text());
+            if (ui->modeHA->isChecked())
+            {
+                double ha = fromHMS(ui->posHA->text());
+                system->GotoPosition_HA_Dec(ha, dec);
+            }
+            else if (ui->modeRA->isChecked())
+            {
+                double ra = fromHMS(ui->posRA->text());
+                system->GotoPosition_RA_Dec(ra, dec);
+            }
         }
-        else if (ui->modeRA->isChecked())
+        else if (ui->modeAZALT->isChecked())
         {
-            double ra = fromHMS(ui->posRA->text());
-            system->GotoPosition_RA_Dec(ra, dec);
+            double az = fromDMS(ui->posAZ->text());
+            double alt = fromDMS(ui->posALT->text());
+            system->GotoPosition_Az_Alt(az, alt);
         }
     }
 }
@@ -152,16 +161,25 @@ void MainWindow::on_setPosition_toggle()
         return;
     if (mountconnected)
     {
-        double dec = fromDMS(ui->posDEC->text());
-        if (ui->modeHA->isChecked())
+        if (ui->modeEQ->isChecked())
         {
-            double ha = fromHMS(ui->posHA->text());
-            system->SetPosition_HA_Dec(ha, dec);
+            double dec = fromDMS(ui->posDEC->text());
+            if (ui->modeHA->isChecked())
+            {
+                double ha = fromHMS(ui->posHA->text());
+                system->SetPosition_HA_Dec(ha, dec);
+            }
+            else if (ui->modeRA->isChecked())
+            {
+                double ra = fromHMS(ui->posRA->text());
+                system->SetPosition_RA_Dec(ra, dec);
+            }
         }
-        else if (ui->modeRA->isChecked())
+        else if (ui->modeAZALT->isChecked())
         {
-            double ra = fromHMS(ui->posRA->text());
-            system->SetPosition_RA_Dec(ra, dec);
+            double az = fromDMS(ui->posAZ->text());
+            double alt = fromDMS(ui->posALT->text());
+            system->SetPosition_Az_Alt(az, alt);
         }
     }
 }
@@ -261,19 +279,26 @@ bool MainWindow::read_position()
 
     std::tuple<double, double> hadec = system->CurrentPosition_HA_Dec();
     std::tuple<double, double> radec = system->CurrentPosition_RA_Dec();
+    std::tuple<double, double> azalt = system->CurrentPosition_Az_Alt();
     double ra = std::get<0>(radec);
     double ha = std::get<0>(hadec);
     double dec = std::get<1>(radec);
+    double az = std::get<0>(azalt);
+    double alt = std::get<1>(azalt);
 
     auto ha_hms = toHMS(ha);
     auto ra_hms = toHMS(ra);
     auto dec_dms = toDMS(dec);
+    auto az_dms = toDMS(az);
+    auto alt_dms = toDMS(alt);
 
     if (!ui->setPosition->isChecked())
     {
         ui->posHA->setText(ha_hms);
         ui->posRA->setText(ra_hms);
         ui->posDEC->setText(dec_dms);
+        ui->posAZ->setText(az_dms);
+        ui->posALT->setText(alt_dms);
     }
     return true;
 }
@@ -307,7 +332,8 @@ void MainWindow::Init()
 
     QTimeZone tz = QTimeZone(ui->timezone->text().toLatin1());
     double lon = ui->longitude->text().toDouble();
-    cs = new CoordinateSystem(tz, lon);
+    double lat = ui->latitude->text().toDouble();
+    cs = new CoordinateSystem(tz, lon, lat);
     ctl = new MountController(mountport, subseconds);
     system = new MountSystem(ctl, cs);
 }

@@ -1,10 +1,11 @@
 #include <QtMath>
 #include "coordinatesystem.h"
 
-CoordinateSystem::CoordinateSystem(QTimeZone tz, double longitude)
+CoordinateSystem::CoordinateSystem(QTimeZone tz, double longitude, double latitude)
 {
     this->tz = tz;
     this->longitude = longitude;
+    this->latitude = latitude;
     datetime2000 = QDateTime(QDate(2000, 1, 1), QTime(0, 0, 0, 0), QTimeZone::utc());
 }
 
@@ -70,4 +71,62 @@ double CoordinateSystem::Convert_RA2HA(double ra, QDateTime datetime)
 {
     std::tuple<qint64, double, double> lst = LocalSidericTime(datetime);
     return ra2ha(ra, std::get<1>(lst));
+}
+
+/* http://www.stargazing.net/kepler/altaz.html
+ *
+ * sin(ALT) = sin(DEC)*sin(LAT)+cos(DEC)*cos(LAT)*cos(HA)
+ *
+ *               sin(DEC) - sin(ALT)*sin(LAT)
+ * cos(A)   = ---------------------------------
+ *                    cos(ALT)*cos(LAT)
+ *
+ * If sin(HA) is negative, then AZ = A, otherwise
+ * AZ = 360 - A
+ */
+
+std::tuple<double, double> CoordinateSystem::Convert_to_Az_Alt(double ha, double dec)
+{
+    double LAT = latitude * M_PI/180;
+    dec = dec * M_PI / 180;
+    ha = ha * M_PI / 12;
+    double sinalt = sin(dec)*sin(LAT) + cos(dec)*cos(LAT)*cos(ha);
+    double alt = asin(sinalt);
+    double cosa = (sin(dec) - sinalt*sin(LAT)) / (cos(alt)*cos(LAT));
+    double a = acos(cosa);
+    double az;
+    if (sin(ha) < 0)
+        az = a;
+    else
+        az = 2*M_PI-a;
+    return std::make_tuple(az*180/M_PI, alt*180/M_PI);
+}
+
+/*
+ * "Practical astronomy with your calculator" Duffett-Smith
+ * https://www.cloudynights.com/topic/448682-help-w-conversion-of-altaz-to-radec-for-dsc/
+ *
+ * sin(D) = sin(A) * sin(L) + cos(A) * cos(L) * cos(AZ)
+ * cos(H) = (sin(A)-sin(L) * sin(D)) / (cos(L) * cos(D))
+ *
+ * D=declination
+ * H=hour angle
+ * A=altitude
+ * AZ-azimuth
+ * L=latitude
+ */
+
+std::tuple<double, double> CoordinateSystem::Convert_from_Az_Alt(double az, double alt)
+{
+    double LAT = latitude * M_PI/180;
+    az = az * M_PI/180;
+    alt = alt * M_PI/180;
+    double sindec = sin(alt)*sin(LAT) + cos(alt)*cos(LAT)*cos(az);
+    double dec = asin(sindec);
+    double cosha = (sin(alt)-sin(LAT)*sindec) / (cos(LAT)*cos(dec));
+    double ha = acos(cosha);
+    if (sin(az) < 0)
+        ha = 2*M_PI - ha;
+
+    return std::make_tuple(ha*12/M_PI, dec*180/M_PI);
 }

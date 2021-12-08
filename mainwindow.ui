@@ -35,7 +35,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QRadioButton" name="radioButton">
+         <widget class="QRadioButton" name="modeEQ">
           <property name="text">
            <string>EQ</string>
           </property>
@@ -112,7 +112,7 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QRadioButton" name="modeAZALT">
           <property name="text">
            <string>ALT-AZ</string>
           </property>

@@ -25,6 +25,17 @@ void MountSystem::SetPosition_RA_Dec(double ra, double dec)
     ctl->SetHADec(ha, dec);
 }
 
+void MountSystem::SetPosition_Az_Alt(double az, double alt)
+{
+    std::tuple<double, double> hadec = cs->Convert_from_Az_Alt(az, alt);
+    this->az = az;
+    this->alt = alt;
+    this->ha = std::get<0>(hadec);
+    this->dec = std::get<1>(hadec);
+    this->ra = cs->Convert_HA2RA(ha, QDateTime::currentDateTime());
+    ctl->SetHADec(ha, dec);
+}
+
 void MountSystem::GotoPosition_HA_Dec(double ha, double dec)
 {
     ctl->GotoHADec(ha, dec);
@@ -33,6 +44,14 @@ void MountSystem::GotoPosition_HA_Dec(double ha, double dec)
 void MountSystem::GotoPosition_RA_Dec(double ra, double dec)
 {
     double ha = cs->Convert_RA2HA(ra, QDateTime::currentDateTime());
+    ctl->GotoHADec(ha, dec);
+}
+
+void MountSystem::GotoPosition_Az_Alt(double az, double alt)
+{
+    std::tuple<double, double> hadec = cs->Convert_from_Az_Alt(az, alt);
+    double ha = std::get<0>(hadec);
+    double dec = std::get<1>(hadec);
     ctl->GotoHADec(ha, dec);
 }
 
@@ -52,6 +71,11 @@ std::tuple<double, double> MountSystem::CurrentPosition_RA_Dec()
     return std::make_tuple(ra, dec);
 }
 
+std::tuple<double, double> MountSystem::CurrentPosition_Az_Alt()
+{
+    return std::make_tuple(az, alt);
+}
+
 void MountSystem::SetSpeed_HA_Dec(double speed_ha, double speed_dec)
 {
     ctl->SetSpeed(speed_ha, speed_dec);
@@ -65,6 +89,9 @@ bool MountSystem::ReadPosition()
     this->ha = std::get<1>(hadec);
     this->dec = std::get<2>(hadec);
     this->ra = cs->Convert_HA2RA(this->ha, QDateTime::currentDateTime());
+    std::tuple<double, double> azalt = cs->Convert_to_Az_Alt(this->ha, this->dec);
+    this->az = std::get<0>(azalt);
+    this->alt = std::get<1>(azalt);
     return true;
 }
 
