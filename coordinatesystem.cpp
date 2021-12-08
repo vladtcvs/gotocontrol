@@ -91,8 +91,18 @@ std::tuple<double, double> CoordinateSystem::Convert_to_Az_Alt(double ha, double
     dec = dec * M_PI / 180;
     ha = ha * M_PI / 12;
     double sinalt = sin(dec)*sin(LAT) + cos(dec)*cos(LAT)*cos(ha);
+    if (sinalt > 1)
+        sinalt = 1;
+    if (sinalt < -1)
+        sinalt = -1;
+
     double alt = asin(sinalt);
     double cosa = (sin(dec) - sinalt*sin(LAT)) / (cos(alt)*cos(LAT));
+    if (cosa > 1)
+        cosa = 1;
+    if (cosa < -1)
+        cosa = -1;
+
     double a = acos(cosa);
     double az;
     if (sin(ha) < 0)
@@ -122,10 +132,18 @@ std::tuple<double, double> CoordinateSystem::Convert_from_Az_Alt(double az, doub
     az = az * M_PI/180;
     alt = alt * M_PI/180;
     double sindec = sin(alt)*sin(LAT) + cos(alt)*cos(LAT)*cos(az);
+    if (sindec > 1)
+        sindec = 1;
+    if (sindec < -1)
+        sindec = -1;
     double dec = asin(sindec);
     double cosha = (sin(alt)-sin(LAT)*sindec) / (cos(LAT)*cos(dec));
+    if (cosha > 1)
+        cosha = 1;
+    if (cosha < -1)
+        cosha = -1;
     double ha = acos(cosha);
-    if (sin(az) < 0)
+    if (sin(az) > 0)
         ha = 2*M_PI - ha;
 
     return std::make_tuple(ha*12/M_PI, dec*180/M_PI);

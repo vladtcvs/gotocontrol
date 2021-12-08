@@ -21,8 +21,8 @@ public:
 public slots:
     void on_connect_clicked();
     void on_disableSteppers_clicked();
-    void on_gotoPosition_clicked();
-    void on_setPosition_toggle();
+    void on_gotoPosition_clicked(bool checked);
+    void on_setPosition_clicked(bool checked);
     void on_setRotationSpeed_clicked();
     void on_lx200listen_clicked();
     void on_lx200pty_toggled(bool checked);

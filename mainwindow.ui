@@ -359,6 +359,9 @@ steppers</string>
         <property name="text">
          <string>Goto</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>

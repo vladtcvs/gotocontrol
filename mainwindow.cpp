@@ -128,8 +128,10 @@ void MainWindow::on_disableSteppers_clicked()
         system->DisableSteppers();
 }
 
-void MainWindow::on_gotoPosition_clicked()
+void MainWindow::on_gotoPosition_clicked(bool checked)
 {
+    if (checked)
+        return;
     if (mountconnected)
     {
         if (ui->modeEQ->isChecked())
@@ -155,9 +157,9 @@ void MainWindow::on_gotoPosition_clicked()
     }
 }
 
-void MainWindow::on_setPosition_toggle()
+void MainWindow::on_setPosition_clicked(bool checked)
 {
-    if (ui->setPosition->isChecked())
+    if (checked)
         return;
     if (mountconnected)
     {
@@ -292,7 +294,7 @@ bool MainWindow::read_position()
     auto az_dms = toDMS(az);
     auto alt_dms = toDMS(alt);
 
-    if (!ui->setPosition->isChecked())
+    if (!ui->setPosition->isChecked() && !ui->gotoPosition->isChecked())
     {
         ui->posHA->setText(ha_hms);
         ui->posRA->setText(ra_hms);
