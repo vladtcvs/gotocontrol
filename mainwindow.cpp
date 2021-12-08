@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QSerialPortInfo>
 #include <QDir>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -389,6 +390,10 @@ void MainWindow::start_lx200_server()
         }
 
         QString fn = QDir::tempPath() + "/telescope";
+        if (QFile::exists(fn))
+        {
+            QFile::remove(fn);
+        }
         QFile::link(QString(ptsname_buffer), fn);
         ui->lx200port->setText(fn);
     }
@@ -412,7 +417,9 @@ void MainWindow::stop_lx200_server()
 
 QString MainWindow::toHMS(double x)
 {
-    return QString::number(x);
+    QString hms;
+    hms.sprintf("%07.4f", x);
+    return hms;
 }
 
 double MainWindow::fromHMS(QString hms)
@@ -422,7 +429,9 @@ double MainWindow::fromHMS(QString hms)
 
 QString MainWindow::toDMS(double x)
 {
-    return QString::number(x);
+    QString dms;
+    dms.sprintf("%07.4f", x);
+    return dms;
 }
 
 double MainWindow::fromDMS(QString dms)
