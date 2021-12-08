@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QSerialPortInfo>
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -386,7 +387,10 @@ void MainWindow::start_lx200_server()
             msg.setText("Can not handle " + ptmx);
             return;
         }
-        ui->lx200port->setText(QString(ptsname_buffer));
+
+        QString fn = QDir::tempPath() + "/telescope";
+        QFile::link(QString(ptsname_buffer), fn);
+        ui->lx200port->setText(fn);
     }
     ui->lx200listen->setText("Stop");
     server = new LX200Server(system, lx200port);
