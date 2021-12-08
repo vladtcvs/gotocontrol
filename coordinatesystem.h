@@ -23,6 +23,9 @@ public:
 
     std::tuple<double, double> Convert_to_Az_Alt(double ha, double dec);
     std::tuple<double, double> Convert_from_Az_Alt(double az, double alt);
+
+    std::tuple<double, double> Inverted_HA_Dec_Coordinates(double ha, double dec);
+    std::tuple<bool, double, double> Normalized_HA_Dec_Coordinates(double ha, double dec);
 };
 
 #endif // COORDINATESYSTEM_H

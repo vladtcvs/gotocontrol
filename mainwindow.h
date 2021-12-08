@@ -30,8 +30,8 @@ public slots:
 
     void on_normalizeCS_clicked();
     void on_switchCS_clicked();
-    void on_setCS1_toggled(bool checked);
-    void on_setCS2_toggled(bool checked);
+    void on_selectCS1_toggled(bool checked);
+    void on_selectCS2_toggled(bool checked);
 
     void on_mountport_returnPressed();
     void on_lx200port_returnPressed();

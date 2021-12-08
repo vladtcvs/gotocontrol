@@ -228,18 +228,26 @@ void MainWindow::on_switchCS_clicked()
     }
 }
 
-void MainWindow::on_setCS1_toggled(bool checked)
+void MainWindow::on_selectCS1_toggled(bool checked)
 {
     if (!checked)
         return;
-    system->SetDecAxisDirection(false);
+    if (system->DecAxisDirection())
+    {
+        system->InvertCoordinates();
+        system->SetDecAxisDirection(false);
+    }
 }
 
-void MainWindow::on_setCS2_toggled(bool checked)
+void MainWindow::on_selectCS2_toggled(bool checked)
 {
     if (!checked)
         return;
-    system->SetDecAxisDirection(true);
+    if (!system->DecAxisDirection())
+    {
+        system->InvertCoordinates();
+        system->SetDecAxisDirection(true);
+    }
 }
 
 void MainWindow::on_lx200listen_clicked()
@@ -389,13 +397,14 @@ void MainWindow::start_lx200_server()
             return;
         }
 
-        QString fn = QDir::tempPath() + "/telescope";
+        QString ptsname(ptsname_buffer);
+        /*QString fn = QDir::tempPath() + "/telescope";
         if (QFile::exists(fn))
         {
             QFile::remove(fn);
         }
-        QFile::link(QString(ptsname_buffer), fn);
-        ui->lx200port->setText(fn);
+        QFile::link(ptsname, fn);*/
+        ui->lx200port->setText(ptsname);
     }
     ui->lx200listen->setText("Stop");
     server = new LX200Server(system, lx200port);

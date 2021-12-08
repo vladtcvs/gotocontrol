@@ -107,30 +107,15 @@ void MountSystem::DisableSteppers()
 
 void MountSystem::NormalizeCoordinates()
 {
-    bool inv = false;
-    if (dec > 90)
-    {
-        dec = 180 - dec;
-        inv = true;
-    }
-    else if (dec < -90)
-    {
-        dec = -180 - dec;
-        inv = true;
-    }
-
-    SetPosition_RA_Dec(ra, dec);
-    if (inv)
-        SetDecAxisDirection(!dec_invert);
+    if (dec > 90 || dec < -90)
+        InvertCoordinates();
 }
 
 void MountSystem::InvertCoordinates()
 {
-    NormalizeCoordinates();
-    if (dec > 0)
-        dec = 180 - dec;
-    else
-        dec = -180 - dec;
+    std::tuple<double, double> inverted_crd = cs->Inverted_HA_Dec_Coordinates(ha, dec);
+    ha = std::get<0>(inverted_crd);
+    dec = std::get<1>(inverted_crd);
+    SetPosition_HA_Dec(ha, dec);
     SetDecAxisDirection(!dec_invert);
-    SetPosition_RA_Dec(ra, dec);
 }

@@ -87,6 +87,10 @@ double CoordinateSystem::Convert_RA2HA(double ra, QDateTime datetime)
 
 std::tuple<double, double> CoordinateSystem::Convert_to_Az_Alt(double ha, double dec)
 {
+    std::tuple<bool, double, double> normed = Normalized_HA_Dec_Coordinates(ha, dec);
+    ha = std::get<1>(normed);
+    dec = std::get<2>(normed);
+
     double LAT = latitude * M_PI/180;
     dec = dec * M_PI / 180;
     ha = ha * M_PI / 12;
@@ -147,4 +151,32 @@ std::tuple<double, double> CoordinateSystem::Convert_from_Az_Alt(double az, doub
         ha = 2*M_PI - ha;
 
     return std::make_tuple(ha*12/M_PI, dec*180/M_PI);
+}
+
+std::tuple<double, double> CoordinateSystem::Inverted_HA_Dec_Coordinates(double ha, double dec)
+{
+    if (dec > 0)
+        dec = 180-dec;
+    else
+        dec = -180+dec;
+    ha = ha + 12;
+    while (ha < 0)
+        ha += 24;
+    while (ha > 24)
+        ha -= 24;
+    return std::make_tuple(ha, dec);
+}
+
+std::tuple<bool, double, double> CoordinateSystem::Normalized_HA_Dec_Coordinates(double ha, double dec)
+{
+    if (dec > 90 || dec < -90)
+    {
+        auto inv = Inverted_HA_Dec_Coordinates(ha, dec);
+        return std::make_tuple(true, std::get<0>(inv), std::get<1>(inv));
+    }
+    while (ha < 0)
+        ha += 24;
+    while (ha > 24)
+        ha -= 24;
+    return std::make_tuple(false, ha, dec);
 }
