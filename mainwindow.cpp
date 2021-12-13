@@ -137,10 +137,58 @@ void MainWindow::on_disableSteppers_clicked()
         system->DisableSteppers();
 }
 
+void MainWindow::ShowPosition(bool show_target)
+{
+    std::tuple<double, double> hadec = system->CurrentPosition_HA_Dec();
+    std::tuple<double, double> radec = system->CurrentPosition_RA_Dec();
+    std::tuple<double, double> azalt = system->CurrentPosition_Az_Alt();
+    double ra = std::get<0>(radec);
+    double ha = std::get<0>(hadec);
+    double dec = std::get<1>(radec);
+    double az = std::get<0>(azalt);
+    double alt = std::get<1>(azalt);
+    auto ha_hms = toHMS(ha);
+    auto ra_hms = toHMS(ra);
+    auto dec_dms = toDMS(dec);
+    auto az_dms = toDMS(az);
+    auto alt_dms = toDMS(alt);
+
+    if (show_target)
+    {
+        std::tuple<TrackerMode, double, double> target = system->CurrentTarget();
+        switch (std::get<0>(target))
+        {
+        case TrackerHoldHADec:
+            ha_hms = ha_hms + " (" + toHMS(std::get<1>(target)) + ")";
+            dec_dms = dec_dms + " (" + toDMS(std::get<2>(target)) + ")";
+            break;
+        case TrackerHoldRADec:
+            ra_hms = ra_hms + " (" + toHMS(std::get<1>(target)) + ")";
+            dec_dms = dec_dms + " (" + toDMS(std::get<2>(target)) + ")";
+            break;
+        case TrackerHoldAzAlt:
+            az_dms = az_dms + " (" + toDMS(std::get<1>(target)) + ")";
+            alt_dms = alt_dms + " (" + toDMS(std::get<2>(target)) + ")";
+            break;
+        case TrackerHoldNone:
+            break;
+        }
+    }
+
+    ui->posHA->setText(ha_hms);
+    ui->posRA->setText(ra_hms);
+    ui->posDEC->setText(dec_dms);
+    ui->posAZ->setText(az_dms);
+    ui->posALT->setText(alt_dms);
+}
+
 void MainWindow::on_gotoPosition_clicked(bool checked)
 {
     if (checked)
+    {
+        ShowPosition(false);
         return;
+    }
     if (mountconnected)
     {
         if (ui->modeEQ->isChecked())
@@ -169,7 +217,10 @@ void MainWindow::on_gotoPosition_clicked(bool checked)
 void MainWindow::on_setPosition_clicked(bool checked)
 {
     if (checked)
+    {
+        ShowPosition(false);
         return;
+    }
     if (mountconnected)
     {
         if (ui->modeEQ->isChecked())
@@ -297,28 +348,9 @@ bool MainWindow::read_position()
         return false;
     }
 
-    std::tuple<double, double> hadec = system->CurrentPosition_HA_Dec();
-    std::tuple<double, double> radec = system->CurrentPosition_RA_Dec();
-    std::tuple<double, double> azalt = system->CurrentPosition_Az_Alt();
-    double ra = std::get<0>(radec);
-    double ha = std::get<0>(hadec);
-    double dec = std::get<1>(radec);
-    double az = std::get<0>(azalt);
-    double alt = std::get<1>(azalt);
-
-    auto ha_hms = toHMS(ha);
-    auto ra_hms = toHMS(ra);
-    auto dec_dms = toDMS(dec);
-    auto az_dms = toDMS(az);
-    auto alt_dms = toDMS(alt);
-
     if (!ui->setPosition->isChecked() && !ui->gotoPosition->isChecked())
     {
-        ui->posHA->setText(ha_hms);
-        ui->posRA->setText(ra_hms);
-        ui->posDEC->setText(dec_dms);
-        ui->posAZ->setText(az_dms);
-        ui->posALT->setText(alt_dms);
+        ShowPosition(true);
     }
     return true;
 }

@@ -176,6 +176,8 @@ std::tuple<double, double, double> Tracker::Track_Az_Alt(double delta_t, double 
 
 std::tuple<double, double, double> Tracker::ProcessTrack(double delta_t)
 {
+    delta_t *= 4;
+
     switch(mode)
     {
     case TrackerHoldRADec:
@@ -224,4 +226,26 @@ void Tracker::InvertCoordinates()
     default:
         break;
     }
+}
+
+TrackerMode Tracker::Get_Tracking_Target(double *a, double *b)
+{
+    switch(mode)
+    {
+    case TrackerHoldRADec:
+        *a = target_ra;
+        *b = target_dec;
+        break;
+    case TrackerHoldHADec:
+        *a = target_ha;
+        *b = target_dec;
+        break;
+    case TrackerHoldAzAlt:
+        *a = target_az;
+        *b = target_alt;
+        break;
+    case TrackerHoldNone:
+        break;
+    }
+    return mode;
 }

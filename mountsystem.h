@@ -41,6 +41,8 @@ public:
     void Move_HA_Dec(double dha, double ddec, double time);
     //bool AddGotoMovement_HA_Dec(double ha, double dec, double time);
 
+    std::tuple<TrackerMode, double, double> CurrentTarget();
+
     void SetDecAxisDirection(bool invert);
 
     std::tuple<double, double> CurrentPosition_HA_Dec();

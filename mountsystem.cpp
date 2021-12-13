@@ -143,6 +143,13 @@ std::tuple<double, double> MountSystem::CurrentPosition_Az_Alt()
     return std::make_tuple(az, alt);
 }
 
+std::tuple<TrackerMode, double, double> MountSystem::CurrentTarget()
+{
+    double a, b;
+    auto mode = tracker->Get_Tracking_Target(&a, &b);
+    return std::make_tuple(mode, a, b);
+}
+
 bool MountSystem::ReadPosition()
 {
     std::tuple<bool, int, int> r = ctl->ReadPosition();
@@ -196,7 +203,7 @@ void MountSystem::Move_HA_Dec(double dha, double ddec, double time)
     int dy = ddec/360 * cfg->y_steps;
     if (dec_invert)
         dy = -dy;
-    ctl->Goto(dx, dy, time);
+    ctl->Goto(dx, dy, time*1e6);
 }
 
 void MountSystem::TrackingPeriodic(double dt)

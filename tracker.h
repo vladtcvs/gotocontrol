@@ -32,14 +32,25 @@ private:
     QDateTime finish_time;
 public:
     Tracker(CoordinateSystem *cs, MountController *ctl, Config *cfg);
+
+    // Start tracking and specify current position
     void Init_Track_RA_Dec(double ra, double dec);
     void Init_Track_HA_Dec(double ha, double dec);
     void Init_Track_Az_Alt(double az, double alt);
     void StopTracking();
+
+    // Set target position
     void Set_Target_RA_Dec(double ra, double dec);
     void Set_Target_HA_Dec(double ha, double dec);
     void Set_Target_Az_Alt(double az, double alt);
+
+    // Show tracking target
+    TrackerMode Get_Tracking_Target(double *a, double *b);
+
+    // Should be called by timer
     std::tuple<double, double, double> ProcessTrack(double delta_t);
+
+    // Invert coordinate system (dec > 90)
     void InvertCoordinates();
 private:
     std::tuple<double, double> Track(double target_ha, double target_dec, QDateTime new_finish_time, double delta_t);

@@ -54,6 +54,7 @@ private:
     bool lx200running;
     bool useSerial;
     double period_dt;
+
 private:
     const int subseconds = 2;
     const int baudrate = 9600;
@@ -68,5 +69,6 @@ private:
     double fromHMS(QString hms);
     QString toDMS(double x);
     double fromDMS(QString hms);
+    void ShowPosition(bool show_target);
 };
 #endif // MAINWINDOW_H
