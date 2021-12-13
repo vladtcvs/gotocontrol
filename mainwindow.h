@@ -23,7 +23,7 @@ public slots:
     void on_disableSteppers_clicked();
     void on_gotoPosition_clicked(bool checked);
     void on_setPosition_clicked(bool checked);
-    void on_setRotationSpeed_clicked();
+    void on_rotate_clicked(bool checked);
     void on_lx200listen_clicked();
     void on_lx200pty_toggled(bool checked);
     void on_lx200serial_toggled(bool checked);
@@ -37,6 +37,7 @@ public slots:
     void on_lx200port_returnPressed();
 
     bool read_position();
+    void periodic_callback();
     void serialPortError(QSerialPort::SerialPortError error);
 private:
     QTimer *timer;
@@ -45,11 +46,14 @@ private:
     LX200Server *server;
     MountController *ctl;
     CoordinateSystem *cs;
+    Tracker *tracker;
+    Config *cfg;
     QSerialPort *mountport;
     QSerialPort *lx200port;
     bool mountconnected;
     bool lx200running;
     bool useSerial;
+    double period_dt;
 private:
     const int subseconds = 2;
     const int baudrate = 9600;

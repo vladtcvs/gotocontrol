@@ -163,49 +163,14 @@
          </layout>
         </item>
         <item row="3" column="0">
-         <widget class="QPushButton" name="setRotationSpeed">
+         <widget class="QPushButton" name="rotate">
           <property name="text">
            <string>Rotate</string>
           </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
          </widget>
-        </item>
-        <item row="3" column="1">
-         <layout class="QFormLayout" name="formLayout_6">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>H.A. sec / hr</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="haRotationSpeed">
-            <property name="text">
-             <string>3609.8</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_38">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Dec. sec / hr</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="decRotationSpeed">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </item>
         <item row="2" column="0">
          <widget class="QCheckBox" name="checkBox">
@@ -585,9 +550,9 @@ steppers</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="lx200Group"/>
   <buttongroup name="csGroup"/>
   <buttongroup name="rahaGroup"/>
+  <buttongroup name="lx200Group"/>
   <buttongroup name="eqaaGroup"/>
   <buttongroup name="mountType"/>
  </buttongroups>

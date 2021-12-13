@@ -51,7 +51,7 @@ QString LX200Server::HandleCommand(const QString &cmd)
     }
     else if (cmd == ":Q#")
     {
-        system->SetSpeed_HA_Dec(system->siderial_sync_speed, 0);
+        //system->SetSpeed_HA_Dec(system->siderial_sync_speed, 0);
         return "";
     }
     else if (cmd.left(3) == ":Sr")
@@ -75,7 +75,7 @@ QString LX200Server::HandleCommand(const QString &cmd)
         target_dec = dec * (decs[0].toInt() > 0 ? 1 : -1);
         return "1#";
     }
-    else if (cmd.left(2) == ":S")
+    /*else if (cmd.left(2) == ":S")
     {
         QString cmdr = cmd;
         cmdr = cmdr.replace("#", "");
@@ -83,7 +83,7 @@ QString LX200Server::HandleCommand(const QString &cmd)
         double speed = cmd.toDouble();
         system->SetSpeed_HA_Dec(speed * 3600 / 60.0, 0);
         return "1#";
-    }
+    }*/
     else if (cmd == ":MS#")
     {
         system->GotoPosition_RA_Dec(target_ra, target_dec);

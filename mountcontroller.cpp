@@ -37,13 +37,13 @@ std::tuple<bool, QString> MountController::read()
     }
 }
 
-std::tuple<double, double, MountController::HMode> MountController::ParseState_HA_Dec(const QString &state)
+std::tuple<int, int, int> MountController::ParsePosition(const QString &state)
 {
     QStringList items = state.split(" ");
-    double HA = items[0].toDouble() / 3600;
-    double Dec = items[1].toDouble() / 3600;
-    HMode mode = items[2] == "H" ? HMode::H_Mode : HMode::G_Mode;
-    return std::make_tuple(HA, Dec, mode);
+    int tid = items[0].toInt(nullptr, 8);
+    int x = items[1].toInt(nullptr, 8);
+    int y = items[2].toInt(nullptr, 8);
+    return std::make_tuple(tid, x, y);
 }
 
 QString MountController::CmdReadPosition()
@@ -56,49 +56,93 @@ QString MountController::CmdDisable()
     return "D";
 }
 
-QString MountController::CmdDecAxisDirection(bool dir)
+static QString toOctal(int x)
 {
-    if (dir)
-        return "W T";
+    QString s;
+    if (x < 0)
+    {
+        s = "-";
+        x = -x;
+    }
+    return s + QString::number(x, 8);
+}
+
+QString MountController::CmdGoto(int dx, int dy, int time)
+{
+    int period;
+    if (dx != 0 || dy != 0)
+    {
+        int steps;
+        if (abs(dx) > abs(dy))
+            steps = abs(dx);
+        else
+            steps = abs(dy);
+        period = time / steps;
+    }
     else
-        return "W F";
+    {
+        period = 100;
+    }
+
+    return "G " + toOctal(tid_next()) + " " + toOctal(dx) + " " + toOctal(dy) + " " + toOctal(period);
 }
 
-QString MountController::CmdSetSpeed(double haspeed, double decspeed)
+QString MountController::CmdSetPos(int x, int y)
 {
-    int ssha = haspeed * subseconds;
-    int ssdec = decspeed * subseconds;
-    return "H " + QString::number(ssha) + " " + QString::number(ssdec);
+    return "S " + toOctal(x) + " " + toOctal(y);
 }
 
-QString MountController::CmdGotoHADec(double ha, double dec)
+int MountController::tid_next()
 {
-    return "G " + QString::number((int)(ha*3600)) + " " + QString::number((int)(dec*3600));
+    if (tid < 128)
+        tid = tid+1;
+    else
+        tid = 1;
+    return tid;
 }
 
-QString MountController::CmdSetHADec(double ha, double dec)
+int MountController::tid_delta(int t)
 {
-    return "S " + QString::number((int)(ha*3600)) + " " + QString::number((int)(dec*3600));
+    t -= 1;
+    int tt = tid - 1;
+    if (tt < t)
+        tt += 128;
+    return tt - t;
 }
 
-MountController::MountController(QSerialPort *port, int subseconds)
+int MountController::free_queue_lines(int t)
 {
+    if (t == 0)
+        return queue_size;
+    int delta = tid_delta(t);
+    return queue_size - delta - 1;
+}
+
+MountController::MountController(QSerialPort *port)
+{
+    this->tid = 1;
     this->port = port;
-    this->subseconds = subseconds;
 }
 
-std::tuple<bool, double, double> MountController::ReadPositionHA()
+std::tuple<bool, int, int, int> MountController::_ReadPosition()
 {
     mutex.lock();
     send(CmdReadPosition());
     std::tuple<bool, QString> ans = read();
     mutex.unlock();
     if (std::get<0>(ans) == false)
-        return std::make_tuple(false, 0, 0);
-    std::tuple<double, double, HMode> state = ParseState_HA_Dec(std::get<1>(ans));
-    double ha = std::get<0>(state);
-    double dec = std::get<1>(state);
-    return std::make_tuple(true, ha, dec);
+        return std::make_tuple(false, 0, 0, 0);
+    std::tuple<int, int, int> state = ParsePosition(std::get<1>(ans));
+    int t = std::get<0>(state);
+    int x = std::get<1>(state);
+    int y = std::get<2>(state);
+    return std::make_tuple(true, t, x, y);
+}
+
+std::tuple<bool, int, int> MountController::ReadPosition()
+{
+    auto res = _ReadPosition();
+    return std::make_tuple(std::get<0>(res), std::get<2>(res), std::get<3>(res));
 }
 
 void MountController::DisableSteppers()
@@ -109,34 +153,30 @@ void MountController::DisableSteppers()
     mutex.unlock();
 }
 
-void MountController::SetSpeed(double haspeed, double decspeed)
+bool MountController::Goto(int dx, int dy, int time)
+{
+    if (!HasQueueSpace())
+        return false;
+    mutex.lock();
+    send(CmdGoto(dx, dy, time));
+    read();
+    mutex.unlock();
+    return true;
+}
+
+void MountController::SetPosition(int x, int y)
 {
     mutex.lock();
-    send(CmdSetSpeed(haspeed, decspeed));
+    send(CmdSetPos(x, y));
     read();
     mutex.unlock();
 }
 
-void MountController::GotoHADec(double ha, double dec)
+bool MountController::HasQueueSpace()
 {
-    mutex.lock();
-    send(CmdGotoHADec(ha, dec));
-    read();
-    mutex.unlock();
-}
+    auto res = _ReadPosition();
+    if (std::get<0>(res) == false)
+        return false;
 
-void MountController::SetHADec(double ha, double dec)
-{
-    mutex.lock();
-    send(CmdSetHADec(ha, dec));
-    read();
-    mutex.unlock();
-}
-
-void MountController::SetDecAxisDirection(bool invert)
-{
-    mutex.lock();
-    send(CmdDecAxisDirection(invert));
-    read();
-    mutex.unlock();
+    return free_queue_lines(std::get<1>(res));
 }

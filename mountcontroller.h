@@ -7,33 +7,33 @@
 class MountController
 {
 private:
-    enum HMode {
-        H_Mode,
-        G_Mode,
-    };
+    const int queue_size = 2;
 private:
-    int subseconds;
+    int tid;
     QSerialPort *port;
     QMutex mutex;
 private:
     void send(const QString &cmd);
     std::tuple<bool, QString> read();
 
-    std::tuple<double, double, HMode>  ParseState_HA_Dec(const QString &state);
+    int tid_next();
+    int tid_delta(int t);
+    int free_queue_lines(int t);
+
+    std::tuple<int, int, int>  ParsePosition(const QString &state);
+    std::tuple<bool, int, int, int> _ReadPosition();
+
     QString CmdReadPosition();
     QString CmdDisable();
-    QString CmdSetSpeed(double haspeed, double decspeed);
-    QString CmdGotoHADec(double ha, double dec);
-    QString CmdSetHADec(double ha, double dec);
-    QString CmdDecAxisDirection(bool dir);
+    QString CmdGoto(int dx, int dy, int period);
+    QString CmdSetPos(int x, int y);
 public:
-    MountController(QSerialPort *port, int subseconds);
-    std::tuple<bool, double, double> ReadPositionHA();
+    MountController(QSerialPort *port);
+    std::tuple<bool, int, int> ReadPosition();
     void DisableSteppers();
-    void SetSpeed(double haspeed, double decspeed);
-    void GotoHADec(double ha, double dec);
-    void SetHADec(double ha, double dec);
-    void SetDecAxisDirection(bool invert);
+    bool Goto(int dx, int dy, int time);
+    void SetPosition(int x, int y);
+    bool HasQueueSpace();
 };
 
 #endif // MOUNTCONTROLLER_H

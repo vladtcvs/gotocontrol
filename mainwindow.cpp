@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     timer = new QTimer(this);
 
-    connect(timer, SIGNAL(timeout()), this, SLOT(read_position()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(periodic_callback()));
 
     ui->setupUi(this);
     mountconnected = false;
@@ -22,13 +22,20 @@ MainWindow::MainWindow(QWidget *parent)
     lx200running = false;
     system = nullptr;
     mountport = nullptr;
+    period_dt = 0.5;
 }
 
 MainWindow::~MainWindow()
 {
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(read_position()));
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(periodic_callback()));
     delete timer;
     delete ui;
+}
+
+void MainWindow::periodic_callback()
+{
+    read_position();
+    system->TrackingPeriodic(period_dt);
 }
 
 void MainWindow::connect_port()
@@ -47,7 +54,7 @@ void MainWindow::connect_port()
         ui->connect->setText("Disconnect");
         mountconnected = true;
 
-        timer->start(500);
+        timer->start(period_dt*1000);
         ui->lx200listen->setEnabled(true);
     }
 }
@@ -188,13 +195,14 @@ void MainWindow::on_setPosition_clicked(bool checked)
     }
 }
 
-void MainWindow::on_setRotationSpeed_clicked()
+void MainWindow::on_rotate_clicked(bool checked)
 {
     if (mountconnected)
     {
-        double haspeed = ui->haRotationSpeed->text().toDouble();
-        double decspeed = ui->decRotationSpeed->text().toDouble();
-        system->SetSpeed_HA_Dec(haspeed, decspeed);
+        if (!checked)
+            system->StopTracking();
+        else
+            system->StartTracking_RA_Dec();
     }
 }
 
@@ -346,8 +354,10 @@ void MainWindow::Init()
     double lon = ui->longitude->text().toDouble();
     double lat = ui->latitude->text().toDouble();
     cs = new CoordinateSystem(tz, lon, lat);
-    ctl = new MountController(mountport, subseconds);
-    system = new MountSystem(ctl, cs);
+    ctl = new MountController(mountport);
+    cfg = new Config();
+    tracker = new Tracker(cs, ctl, cfg);
+    system = new MountSystem(ctl, cs, tracker, cfg);
 }
 
 void MainWindow::start_lx200_server()

@@ -16,19 +16,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    config.cpp \
     coordinatesystem.cpp \
     lx200server.cpp \
     main.cpp \
     mainwindow.cpp \
     mountcontroller.cpp \
-    mountsystem.cpp
+    mountsystem.cpp \
+    tracker.cpp
 
 HEADERS += \
+    config.h \
     coordinatesystem.h \
     lx200server.h \
     mainwindow.h \
     mountcontroller.h \
-    mountsystem.h
+    mountsystem.h \
+    tracker.h
 
 FORMS += \
     mainwindow.ui
